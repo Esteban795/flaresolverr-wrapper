@@ -6,5 +6,11 @@ class FlaresolverrError(Exception):
         self.err = err
     
     @classmethod
-    def from_dict(cls, data : dict) -> FlaresolverrError:
+    def from_dict(cls, data : dict) -> 'FlaresolverrError':
         return cls(data['status'], data['version'], data['error'])
+
+class ProxyNotFound(Exception):
+    
+    def __init__(self, msg : str):
+        super().__init__(msg)
+        self.msg = msg
