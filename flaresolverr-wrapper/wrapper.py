@@ -46,11 +46,11 @@ class Flaresolverr:
     @property
     def sessions(self) -> List[str]:
         params = {
-            "cmd" : "session.list"
+            "cmd" : "sessions.list"
         }
-        response = self.session.post(self.proxy_url,params=params)
-        print(response.content)
+        response = self.session.post(self.proxy_url,json=params)
         response_json = response.json()
+        print(response_json)
         if response_json.get("error") is not None:
             raise FlaresolverrError.from_dict(response_json)
         return SessionsListResponse.from_dict(response_json)
@@ -63,8 +63,62 @@ class Flaresolverr:
             params["session"] = session_id
         response = self.session.post(self.proxy_url,json=params)
         response_json = response.json()
-        print(response_json)
         if response_json["status"] != "ok":
             raise FlaresolverrError.from_dict(response_json)
         return SessionCreateResponse.from_dict(response_json)
     
+    def deleteSession(self, session_id : str) -> PostRequestResponse:
+        params = {
+            "cmd" : "session.delete",
+            "session" : session_id
+        }
+        response = self.session.post(self.proxy_url,params=params)
+        response_json = response.json()
+        if response_json.get("error") is not None:
+            raise FlaresolverrError.from_dict(response_json)
+        return PostRequestResponse.from_dict(response_json)
+    
+    def _perform_post_request(self, params : dict) -> PostRequestResponse:
+        response = self.session.post(self.proxy_url,params=params)
+        response_json = response.json()
+        if response_json.status != "ok":
+            raise FlaresolverrError.from_dict(response_json)
+        return PostRequestResponse.from_dict(response_json)
+    
+    def _add_optional_args(self, params : dict, session, session_ttl, cookies) -> PostRequestResponse:
+        if session:
+            params["session"] = session
+        if session_ttl:
+            params["sessionTTL"] = session_ttl
+        if cookies:
+            params["cookies"] = cookies
+        return self._perform_post_request(params)
+    
+    def get(self,url : str,session : str = None, session_ttl : int = None, max_timeout : int = None, cookies : List[dict] = None,only_cookies : bool = False):
+        params = {
+            "cmd" : "request.get",
+            "url" : url,
+            "maxTimeout" : max_timeout,
+            "returnOnlyCookies" : only_cookies
+        }
+        return self._add_optional_args(params, session, session_ttl, cookies,)
+
+
+    def post(self,url : str,post_data : dict,session : str = None, session_ttl : int = None, max_timeout : int = None, cookies : List[dict] = None,only_cookies : bool = False):
+        params = {
+            "cmd" : "request.post",
+            "url" : url,
+            post_data : urlencode(post_data),
+            "maxTimeout" : max_timeout,
+            "returnOnlyCookies" : only_cookies
+        }
+        return self._add_optional_args(params, session, session_ttl, cookies)
+    
+
+if __name__ == "__main__":
+    fs = Flaresolverr()
+    headers = {
+        "Connection" : "keep-alive"
+    }
+    fs.createSession()
+    fs.sessions
