@@ -77,11 +77,11 @@ class Flaresolverr:
             raise FlaresolverrError.from_dict(response_json)
         response_json["session"] = session_id
         return SessionDeleteResponse.from_dict(response_json)
-    
+
     def _perform_post_request(self, params : dict) -> PostRequestResponse:
-        response = self.session.post(self.proxy_url,params=params)
+        response = self.session.post(self.proxy_url,json=params)
         response_json = response.json()
-        if response_json.status != "ok":
+        if response_json["status"] != "ok":
             raise FlaresolverrError.from_dict(response_json)
         return PostRequestResponse.from_dict(response_json)
     
@@ -103,7 +103,6 @@ class Flaresolverr:
         }
         return self._add_optional_args(params, session, session_ttl, cookies,)
 
-
     def post(self,url : str,post_data : dict,session : str = None, session_ttl : int = None, max_timeout : int = None, cookies : List[dict] = None,only_cookies : bool = False):
         params = {
             "cmd" : "request.post",
@@ -113,15 +112,3 @@ class Flaresolverr:
             "returnOnlyCookies" : only_cookies
         }
         return self._add_optional_args(params, session, session_ttl, cookies)
-    
-
-if __name__ == "__main__":
-    fs = Flaresolverr()
-    headers = {
-        "Connection" : "keep-alive"
-    }
-    fs.checkFSOnline()
-    fs.createSession("1")
-    print(fs.sessions)
-    fs.deleteSession("1")
-    print(fs.sessions)
