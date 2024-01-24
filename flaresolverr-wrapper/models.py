@@ -25,7 +25,7 @@ class SessionsListResponse:
 
     @classmethod
     def from_dict(cls, data : dict) -> 'SessionsListResponse':
-        return cls(data['start_timestamp'], data['end_timestamp'], data['version'], data['status'], data['message'], data['sessions'])
+        return cls(data['startTimestamp'], data['endTimestamp'], data['version'], data['status'], data['message'], data['sessions'])
 
 @dataclass
 class SessionCreateResponse:
@@ -39,7 +39,19 @@ class SessionCreateResponse:
     @classmethod
     def from_dict(cls, data : dict) -> 'SessionCreateResponse':
         return cls(data['startTimestamp'], data['endTimestamp'], data['version'], data['status'], data['message'], data['session'])
-    
+
+@dataclass
+class SessionDeleteResponse:
+    start_timestamp : int
+    end_timestamp : int
+    version : int
+    status : int
+    message : int
+    session_id : int
+
+    @classmethod    
+    def from_dict(cls, data : dict) -> 'SessionDeleteResponse':
+        return cls(data['startTimestamp'], data['endTimestamp'], data['version'], data['status'], data['message'],data['session'])
 @dataclass
 class Solution:
 
@@ -66,8 +78,8 @@ class PostRequestResponse:
     @classmethod 
     def from_dict(cls, data: dict) -> 'PostRequestResponse':
         return cls(
-            data['start_timestamp'],
-            data['end_timestamp'],
+            data['startTimestamp'],
+            data['endTimestamp'],
             data['version'],
             data['status'],
             data['message'],

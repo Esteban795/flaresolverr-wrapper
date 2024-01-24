@@ -1,4 +1,4 @@
-from models import SessionsListResponse,SessionCreateResponse,FlaresolverrReady,PostRequestResponse
+from models import SessionsListResponse,SessionCreateResponse,SessionDeleteResponse,FlaresolverrReady,PostRequestResponse
 from exceptions import FlaresolverrError,ProxyNotFound
 
 
@@ -50,10 +50,9 @@ class Flaresolverr:
         }
         response = self.session.post(self.proxy_url,json=params)
         response_json = response.json()
-        print(response_json)
         if response_json.get("error") is not None:
             raise FlaresolverrError.from_dict(response_json)
-        return SessionsListResponse.from_dict(response_json)
+        return SessionsListResponse.from_dict(response_json).sessions
     
     def createSession(self, session_id : str = None) -> SessionCreateResponse:
         params = {
@@ -67,16 +66,17 @@ class Flaresolverr:
             raise FlaresolverrError.from_dict(response_json)
         return SessionCreateResponse.from_dict(response_json)
     
-    def deleteSession(self, session_id : str) -> PostRequestResponse:
+    def deleteSession(self, session_id : str) -> SessionDeleteResponse:
         params = {
-            "cmd" : "session.delete",
+            "cmd" : "sessions.destroy",
             "session" : session_id
         }
-        response = self.session.post(self.proxy_url,params=params)
+        response = self.session.post(self.proxy_url,json=params)
         response_json = response.json()
         if response_json.get("error") is not None:
             raise FlaresolverrError.from_dict(response_json)
-        return PostRequestResponse.from_dict(response_json)
+        response_json["session"] = session_id
+        return SessionDeleteResponse.from_dict(response_json)
     
     def _perform_post_request(self, params : dict) -> PostRequestResponse:
         response = self.session.post(self.proxy_url,params=params)
@@ -120,5 +120,8 @@ if __name__ == "__main__":
     headers = {
         "Connection" : "keep-alive"
     }
-    fs.createSession()
-    fs.sessions
+    fs.checkFSOnline()
+    fs.createSession("1")
+    print(fs.sessions)
+    fs.deleteSession("1")
+    print(fs.sessions)
